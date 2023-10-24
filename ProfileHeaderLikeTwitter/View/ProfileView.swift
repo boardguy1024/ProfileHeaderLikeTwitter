@@ -28,6 +28,7 @@ enum TabFilter: Int, Identifiable, CaseIterable {
 struct ProfileView: View {
     
     @State var offset: CGFloat = 0
+    @State var tabBarOffset: CGFloat = 0
     let screenWidth = UIScreen.main.bounds.width
     let headerImageHeight: CGFloat = 170
 
@@ -97,24 +98,26 @@ struct ProfileView: View {
                 .padding(.horizontal)
                 .padding(.top, 20)
                 
-                // TabButton
-                HStack {
-                    ForEach(TabFilter.allCases) { tab in
-                        TabButton(tab: tab, currentTab: $currentTab, animation: animation)
-                    }
-                }
-                .padding(.top, 20)
-                .overlay(Divider(), alignment: .bottom)
+                // TabBarButton
+                tabBarButton
+                    .offset(y: tabBarOffset < 80 ? -tabBarOffset + 80 : 0)
+                    .overlay(
+                        GeometryReader { proxy -> Color in
+                            
+                            let minY = proxy.frame(in: .global).minY
+                            
+                            DispatchQueue.main.async {
+                                self.tabBarOffset = minY
+                            }
+                            
+                            return Color.clear
+                        }
+                    )
+                    .zIndex(2)
                 
                 // Contents
-                VStack(spacing: 12) {
-                    UserRowView(image: "profile", username: "Glace Lee", bio: "Digital nomad & freelance designer | Passionate about sustainable living 🌍 | Cat mom 🐱 | Exploring the world one coffee at a time ☕️ | #Wanderlust #EcoWarrior")
-                    UserRowView(image: "profile2", username: "Chloe Miller", bio: "🚀 Tech enthusiast & budding entrepreneur | Advocating for mental wellness 🧠 | Dog lover 🐶 | Dive deep into books every night 📚 | #TechGeek #MindfulLiving")
-                    UserRowView(image: "profile3", username: "Samuel Clark", bio: "Digital nomad & freelance designer | Passionate about sustainable living 🌍 | Cat mom 🐱 | Exploring the world one coffee at a time ☕️ | #Wanderlust #EcoWarrior")
-                    UserRowView(image: "profile4", username: "Glace Lee", bio: "🚀 Tech enthusiast & budding entrepreneur | Advocating for mental wellness 🧠 | Dog lover 🐶 | Dive deep into books every night 📚 | #TechGeek #MindfulLiving")
-                }
+                userLowViewListView
             }
-            
         }
         .ignoresSafeArea()
     }
@@ -186,6 +189,30 @@ extension ProfileView {
                     Capsule()
                         .fill(.black)
                 )
+        }
+    }
+    
+    var tabBarButton: some View {
+        HStack {
+            ForEach(TabFilter.allCases) { tab in
+                TabButton(tab: tab, currentTab: $currentTab, animation: animation)
+            }
+        }
+        .padding(.top, 20)
+        .background(.white)
+        .overlay(Divider(), alignment: .bottom)
+    }
+    
+    var userLowViewListView: some View {
+        VStack(spacing: 12) {
+            UserRowView(image: "profile", username: "Glace Lee", bio: "Digital nomad & freelance designer | Passionate about sustainable living 🌍 | Cat mom 🐱 | Exploring the world one coffee at a time ☕️ | #Wanderlust #EcoWarrior")
+            UserRowView(image: "profile2", username: "Chloe Miller", bio: "🚀 Tech enthusiast & budding entrepreneur | Advocating for mental wellness 🧠 | Dog lover 🐶 | Dive deep into books every night 📚 | #TechGeek #MindfulLiving")
+            UserRowView(image: "profile3", username: "Samuel Clark", bio: "Digital nomad & freelance designer | Passionate about sustainable living 🌍 | Cat mom 🐱 | Exploring the world one coffee at a time ☕️ | #Wanderlust #EcoWarrior")
+            UserRowView(image: "profile4", username: "Glace Lee", bio: "🚀 Tech enthusiast & budding entrepreneur | Advocating for mental wellness 🧠 | Dog lover 🐶 | Dive deep into books every night 📚 | #TechGeek #MindfulLiving")
+            UserRowView(image: "profile", username: "Glace Lee", bio: "Digital nomad & freelance designer | Passionate about sustainable living 🌍 | Cat mom 🐱 | Exploring the world one coffee at a time ☕️ | #Wanderlust #EcoWarrior")
+            UserRowView(image: "profile2", username: "Chloe Miller", bio: "🚀 Tech enthusiast & budding entrepreneur | Advocating for mental wellness 🧠 | Dog lover 🐶 | Dive deep into books every night 📚 | #TechGeek #MindfulLiving")
+            UserRowView(image: "profile3", username: "Samuel Clark", bio: "Digital nomad & freelance designer | Passionate about sustainable living 🌍 | Cat mom 🐱 | Exploring the world one coffee at a time ☕️ | #Wanderlust #EcoWarrior")
+            UserRowView(image: "profile4", username: "Glace Lee", bio: "🚀 Tech enthusiast & budding entrepreneur | Advocating for mental wellness 🧠 | Dog lover 🐶 | Dive deep into books every night 📚 | #TechGeek #MindfulLiving")
         }
     }
 }
