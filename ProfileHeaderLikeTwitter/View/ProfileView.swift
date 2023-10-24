@@ -29,6 +29,8 @@ struct ProfileView: View {
     
     @State var offset: CGFloat = 0
     @State var tabBarOffset: CGFloat = 0
+    @State var usernameOffset: CGFloat = 0
+    
     let screenWidth = UIScreen.main.bounds.width
     let headerImageHeight: CGFloat = 170
 
@@ -73,6 +75,16 @@ struct ProfileView: View {
                         .font(.title2)
                         .fontWeight(.bold)
                         .foregroundStyle(.primary)
+                        .overlay(
+                            GeometryReader { proxy -> Color in
+                                let minY = proxy.frame(in: .global).minY
+                                
+                                DispatchQueue.main.async {
+                                    usernameOffset = minY
+                                }
+                                return .clear
+                            }
+                        )
                     
                     Text("@grace_lee")
                         .foregroundStyle(.gray)
@@ -141,6 +153,30 @@ struct ProfileView: View {
             return min(1, max(0, offset - offset * 0.985))
         }
     }
+        
+    func getUsernameOffset() -> CGFloat {
+        if usernameOffset < 60 {
+            return -usernameOffset + 60
+        }
+        return 0
+    }
+    
+    func getUsernameOpacity() -> CGFloat {
+        // Trigger Stated at 80
+        // End at 60
+        // 80 = 0
+        // 60 = 1
+        let opacity = (80 / (usernameOffset ) - 1) * 2
+        
+        if usernameOffset < 80 {
+            // 80未満からは 0...1 にopacityを変更していく
+            let opacity = (80 / (usernameOffset ) - 1) * 2 // 2: scroll分の2倍速さにする
+            return usernameOffset < 60 ? 1 : opacity
+            
+        } else {
+            return 0
+        }
+    }
 }
 
 extension ProfileView {
@@ -176,23 +212,41 @@ extension ProfileView {
     
     var headerImage: AnyView {
         AnyView(
-            Image("tesla")
-                .resizable()
-                .scaledToFill()
-                .frame(width: screenWidth,
-                       // 下にscrollした分 heightの高さをincrementする
-                       height: offset > 0 ? headerImageHeight + offset : headerImageHeight, alignment: .center)
-                .clipShape(Rectangle())
-                .overlay(BlurView().opacity(getOpacity()))
-            // 下にスクロール時はheaderを固定
-            .offset(y:
-                        // scroll down offset: 相殺して　y:0 positionを維持
-                        offset > 0 ?  -offset :
-                       
-                        // scroll up
-                        // (offset > -80 ? 0) 80までは offsetを0にしているので headerImageはScrollViewのスクロールに合わせて動く
-                        // 80を超えた場合 (-80 - offset) y:-80の位置から （scrollした分 - offset分)で相殺し -80ポジションを維持させる
-                        offset > -80 ? 0 : -80 - offset)
+            
+            ZStack(alignment: .bottom) {
+                Image("tesla")
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: screenWidth,
+                           // 下にscrollした分 heightの高さをincrementする
+                           height: offset > 0 ? headerImageHeight + offset : headerImageHeight, alignment: .center)
+                    .clipShape(Rectangle())
+                    .overlay(BlurView().opacity(getOpacity()))
+                // 下にスクロール時はheaderを固定
+                .offset(y:
+                            // scroll down offset: 相殺して　y:0 positionを維持
+                            offset > 0 ?  -offset :
+                           
+                            // scroll up
+                            // (offset > -80 ? 0) 80までは offsetを0にしているので headerImageはScrollViewのスクロールに合わせて動く
+                            // 80を超えた場合 (-80 - offset) y:-80の位置から （scrollした分 - offset分)で相殺し -80ポジションを維持させる
+                            offset > -80 ? 0 : -80 - offset)
+                
+                
+                HStack {
+                    Text("Grace Lee")
+                        .bold()
+                        .foregroundStyle(.white)
+                        .shadow(color: Color.black.opacity(0.2), radius: 5)
+                        .opacity(getUsernameOpacity())
+                        .offset(y: getUsernameOffset())
+                    
+                    Spacer()
+                }
+                .padding(.horizontal, 50)
+                .offset(y: 88)
+                
+            }
         )
     }
     
