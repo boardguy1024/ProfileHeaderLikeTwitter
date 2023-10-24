@@ -27,15 +27,16 @@ enum TabFilter: Int, Identifiable, CaseIterable {
 
 struct ProfileView: View {
     
-    @State var offset: CGFloat = 0
-    @State var tabBarOffset: CGFloat = 0
-    @State var usernameOffset: CGFloat = 0
+    @State private var offset: CGFloat = 0
+    @State private var tabBarOffset: CGFloat = 0
+    @State private var usernameOffset: CGFloat = 0
     
     let screenWidth = UIScreen.main.bounds.width
     let headerImageHeight: CGFloat = 170
 
     @State var currentTab: TabFilter = .posts
     @Namespace var animation
+    
     
     var body: some View {
         
@@ -48,9 +49,7 @@ struct ProfileView: View {
                     // 要は、scrollすると minY -> @State offsetに新しい値が代入され
                     // 代入による、再描画のupdateになるので再帰的呼び出し無限ループに陥る
                     // @State offset更新を非同期にすることで再描画が完了した後に状態を変更できる
-                    DispatchQueue.main.async {
-                        self.offset = minY
-                    }
+                    onChanged(value: minY, state: $offset)
                     
                     return headerImage
                 }
@@ -79,9 +78,8 @@ struct ProfileView: View {
                             GeometryReader { proxy -> Color in
                                 let minY = proxy.frame(in: .global).minY
                                 
-                                DispatchQueue.main.async {
-                                    usernameOffset = minY
-                                }
+                                onChanged(value: minY, state: $usernameOffset)
+                             
                                 return .clear
                             }
                         )
@@ -118,10 +116,8 @@ struct ProfileView: View {
                             
                             let minY = proxy.frame(in: .global).minY
                             
-                            DispatchQueue.main.async {
-                                self.tabBarOffset = minY
-                            }
-                            
+                            onChanged(value: minY, state: $tabBarOffset)
+
                             return Color.clear
                         }
                     )
@@ -136,7 +132,13 @@ struct ProfileView: View {
         .overlay(naviHeader, alignment: .top)
     }
     
-    func getScale() -> CGFloat {
+    private func onChanged(value: CGFloat, state: Binding<CGFloat>) {
+        DispatchQueue.main.async {
+            state.wrappedValue = value
+        }
+    }
+    
+    private func getScale() -> CGFloat {
         if -offset > 80 {
             // scroll量が80を超えたら 0.5のスケールを保つ
             return 0.5
@@ -146,7 +148,7 @@ struct ProfileView: View {
         }
     }
     
-    func getOpacity() -> CGFloat {
+    private func getOpacity() -> CGFloat {
         if offset <= 0 {
             return 0
         } else {
@@ -154,19 +156,18 @@ struct ProfileView: View {
         }
     }
         
-    func getUsernameOffset() -> CGFloat {
+    private func getUsernameOffset() -> CGFloat {
         if usernameOffset < 60 {
             return -usernameOffset + 60
         }
         return 0
     }
     
-    func getUsernameOpacity() -> CGFloat {
+    private func getUsernameOpacity() -> CGFloat {
         // Trigger Stated at 80
         // End at 60
         // 80 = 0
         // 60 = 1
-        let opacity = (80 / (usernameOffset ) - 1) * 2
         
         if usernameOffset < 80 {
             // 80未満からは 0...1 にopacityを変更していく
