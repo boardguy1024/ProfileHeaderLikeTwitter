@@ -100,7 +100,7 @@ struct ProfileView: View {
                 
                 // TabBarButton
                 tabBarButton
-                    .offset(y: tabBarOffset < 80 ? -tabBarOffset + 80 : 0)
+                    .offset(y: tabBarOffset < 90 ? -tabBarOffset + 90 : 0)
                     .overlay(
                         GeometryReader { proxy -> Color in
                             
@@ -115,11 +115,13 @@ struct ProfileView: View {
                     )
                     .zIndex(2)
                 
+                
                 // Contents
                 userLowViewListView
             }
         }
         .ignoresSafeArea()
+        .overlay(naviHeader, alignment: .top)
     }
     
     func getScale() -> CGFloat {
@@ -142,6 +144,35 @@ struct ProfileView: View {
 }
 
 extension ProfileView {
+    
+    var naviHeader: some View {
+        HStack {
+            Image(systemName: "arrow.left")
+                .font(.callout)
+                .foregroundColor(.white)
+                .frame(width: 28, height: 28)
+                .background(Color.black.opacity(0.4))
+                .clipShape(Circle())
+            Spacer()
+            
+            Image(systemName: "magnifyingglass")
+                .font(.callout)
+                .foregroundColor(.white)
+                .frame(width: 28, height: 28)
+                .background(Color.black.opacity(0.4))
+                .clipShape(Circle())
+            Image(systemName: "square.and.arrow.up")
+                .resizable()
+                .scaledToFit()
+                .foregroundColor(.white)
+                .frame(width: 20, height: 20)
+                .offset(y: -2)
+                .padding(4)
+                .background(Color.black.opacity(0.4))
+                .clipShape(Circle())
+        }
+        .padding(.horizontal)
+    }
     
     var headerImage: AnyView {
         AnyView(
@@ -198,7 +229,7 @@ extension ProfileView {
                 TabButton(tab: tab, currentTab: $currentTab, animation: animation)
             }
         }
-        .padding(.top, 20)
+        .padding(.top, 10)
         .background(.white)
         .overlay(Divider(), alignment: .bottom)
     }
