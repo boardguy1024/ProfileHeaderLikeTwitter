@@ -1,6 +1,5 @@
 # ProfileHeaderLikeTwitter (Built on SwiftUI)
-
-### This is a sample implementation that replicates like sort of the scrolling sticky header animation of X(Twitter), built using SwiftUI."
+This is a sample implementation that replicates like sort of the scrolling sticky header animation of X(Twitter), built using SwiftUI."
 
 |ProfileView|Movie|
 |-|:-:|
